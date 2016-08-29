@@ -28,19 +28,25 @@ In the options for the strategy we should pass these options:
 
 The authentication process consists in the following: 
 
-#### 1) For every request sent to the protected route, the `authenticate` function is executed. 
+#### 1) Authenticate
+
+For every request sent to the protected route, the `authenticate` function is executed. 
 
 First it verifies if `n` is a multiple of `divisor`. If not (or if there is no `n`), the authentication fails right there (the reply interface is called with a Boom error).
 
 If we were using [cookies](https://github.com/hapijs/hapi-auth-cookie), this would be analogous of a request that sent an invalid/modified cookie (or that didn't send a cookie).
 
-#### 2) If `n` is a multiple, `validateFunc` is executed with the given name. It must be one of these: `['john', 'anne', 'peter']`. 
+#### 2) validateFunc
+
+If `n` is a multiple, `validateFunc` is executed with the given name. It must be one of these: `['john', 'anne', 'peter']`. 
 
 This array is defined by the user in the `lib/route.js` file. That's why the control is given to the user (via the `validateFunc` function).
 
 If the name matches one of the valid names, the `next` callback should be called with `next(null, true, credentials)`. Otherwise it should be called with `next(null, false, credentials)`.
 
-#### 3) Back in the  `authenticate` function, the `isValid` argument is checked. 
+#### 3) resume authenticate
+
+Back in the  `authenticate` function, the `isValid` argument is checked. 
 
 If it is false, the reply interface is called as `reply(Boom.unauthorized(null, 'dummy'))`. Otherwise, we use `reply.continue({ credentials: credentials })`.
 
