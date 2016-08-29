@@ -15,32 +15,38 @@ This plugin implements a dummy authentication scheme where all this stuff is pre
 
 ## The 'dummy' scheme
 
-The module in `hapi-auth-dummy.js` is a hapi plugin that implement an authentication scheme named 'dummy'.
+The module in `lib/hapi-auth-dummy.js` is a hapi plugin that implement an authentication scheme named 'dummy'.
 
 If a route is configured with an auth strategy that was created using this scheme, the client must send a query string in the format `token=n-name`, where `n` should be an integer and `name` can be anything (the name of the client, for instance). Example:
 ```
 http://localhost:8000/required-auth-single?token=15-john
 ```
 
-In the options for the strategy we should pass these 2 options:
+In the options for the strategy we should pass these options:
 - `divisor`: a positive integer
 - `validateFunc`: a function with signature `function(name, next)` where  `name` is the name given in the query string
 
-The authentication process consists in the following: for every request sent to the protected route, the `authenticate` function is executed.
+The authentication process consists in the following: 
 
-First it verifies if `n` is a multiple of `divisor`. If not, the authentication fails right there. If we were using [cookies](https://github.com/hapijs/hapi-auth-cookie), this would be analogous of a request that doesn't send the cookie (or sends an invalid/modified cookie).
+1) For every request sent to the protected route, the `authenticate` function is executed. 
 
-If `n` is a multiple, `validateFunc` is executed with the given name. It must be one of these: `['john', 'anne', 'peter']`. 
+First it verifies if `n` is a multiple of `divisor`. If not (or if there is no `n`), the authentication fails right there (the reply interface is called with a Boom error).
 
-This array is defined by the user in the `route.js` file. That's why the execution control is given temporarily given to the user (the `validateFunc` function).
+If we were using [cookies](https://github.com/hapijs/hapi-auth-cookie), this would be analogous of a request that sent an invalid/modified cookie (or that didn't send a cookie).
 
-If the name matches one of the valid names, the `next`callback should be called with `next(null, true, credentials)`. Otherwise it should be called with `next(null, false, credentials)`.
+2) If `n` is a multiple, `validateFunc` is executed with the given name. It must be one of these: `['john', 'anne', 'peter']`. 
 
-Back in the  `authenticate` function, the `isValid` argument is checked. If it is false, the reply interface is called as `reply(Boom.unauthorized(null, 'dummy'))`. Otherwise, we use `reply.continue({ credentials: credentials })`.
+This array is defined by the user in the `lib/route.js` file. That's why the control is given to the user (via the `validateFunc` function).
 
-**IMPORTANT NOTE:** If the authentication fails (`isValid` === false, for instance), the Boom error passed to `reply` shouldn't have a message. This is necessary to let Hapi use other auth strategies (assuming the route has been configured with multiple strategies).
+If the name matches one of the valid names, the `next` callback should be called with `next(null, true, credentials)`. Otherwise it should be called with `next(null, false, credentials)`.
 
-See the comments in `hapi-auth-dummy.js` for more details.
+3) Back in the  `authenticate` function, the `isValid` argument is checked. 
+
+If it is false, the reply interface is called as `reply(Boom.unauthorized(null, 'dummy'))`. Otherwise, we use `reply.continue({ credentials: credentials })`.
+
+**IMPORTANT NOTE:** If the authentication fails (if `isValid` === false, for instance), the Boom error passed to `reply` SHOULD NOT have a message. This is necessary to make Hapi use other auth strategies (assuming the route has been configured with multiple strategies).
+
+See the comments in `lib/hapi-auth-dummy.js` for more details.
 
 ## The 'dummy-2' scheme
 
