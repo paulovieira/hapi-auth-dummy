@@ -75,7 +75,7 @@ Then we create the 'test-2' auth strategy, which uses the 'dummy-2' scheme, and 
 
 The examples below assume the `divisor` option is 5 for the strategy 'test' and 6 for 'test-2':
 
-### 1) single strategy ('test')
+#### 1) single strategy ('test')
 ```bash
 curl http://localhost:8000/required-auth-single?token=19-peter
 curl http://localhost:8000/required-auth-single?token=20-peter
@@ -85,7 +85,7 @@ The first request fails because `n` is invalid.
 
 The second succeeds. However if we use `token=20-peterr` it will fail (this time because in `validateFunc` we call the `next` callback with false, but the end result is the same).
 
-###  2) multiple strategies ('test' and 'test-2')
+####  2) multiple strategies ('test' and 'test-2')
 ```bash
 curl http://localhost:8000/required-auth-multiple?token=19-peter --header 'x-token: 23-peter'
 curl http://localhost:8000/required-auth-multiple?token=19-peter --header 'x-token: 24-peter'
