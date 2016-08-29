@@ -50,7 +50,7 @@ See the comments in `lib/hapi-auth-dummy.js` for more details.
 
 ## The 'dummy-2' scheme
 
-This is a copy paste of the 'dummy' scheme, but instead of sending the data in the query string, it should be sent in a custom header 'x-token'. Example:
+This is a copy-paste of the 'dummy' scheme, but instead of sending the data in the query string, it should be sent in a custom header 'x-token'. Example:
 ```bash
 curl http://localhost:8000/required-auth-multiple --header 'x-token: 20-peter'
 ```
@@ -70,9 +70,12 @@ Then we create the 'test-2' auth strategy, which uses the 'dummy-2' scheme, and 
 - `/optional-auth-multiple` - uses auth mode 'optional'
 - `/try-auth-multiple` - uses auth mode 'try'
 
-We can see the multiple strategy working with curl. The examples below assume the `divisor` option is 5 for 'test' and 6 for 'test-2':
 
-1) single strategy
+## Examples
+
+The examples below assume the `divisor` option is 5 for the strategy 'test' and 6 for 'test-2':
+
+1) single strategy ('test')
 ```bash
 curl http://localhost:8000/required-auth-single?token=19-peter
 curl http://localhost:8000/required-auth-single?token=20-peter
@@ -82,7 +85,7 @@ The first request fails because `n` is invalid.
 
 The second succeeds. However is use `token=20-peterr` it will fail (this time because in `validateFunc` we call the `next` callback with false, but the end result is the same).
 
-2) multiple strategies
+2) multiple strategies ('test' and 'test-2')
 ```bash
 curl http://localhost:8000/required-auth-multiple?token=19-peter --header 'x-token: 23-peter'
 curl http://localhost:8000/required-auth-multiple?token=19-peter --header 'x-token: 24-peter'
@@ -96,3 +99,13 @@ Note that if the first strategy succeeds, the second stratgy is not used (that i
 curl http://localhost:8000/required-auth-multiple?token=20-peter --header 'x-token: 24-peter'
 ```
 In the route handler we can use `request.auth.strategy` to check which strategy has been used to authenticate the request.
+
+## 'required' mode vs 'try' mode 
+
+With 'required' mode, we *only* reach the route handler if the request is authenticated (that is, if we call `reply.continue` in the `authenticate` function). 
+This mode should be used for API endpoints with private data, for instance.
+
+With 'try' mode we *always* reach the handler, even if the authentication failed. In the handler we can always verify if the request was authenticated using `request.auth.isAuthenticated` (we can always call `reply(boomErr)` from the handler, which would then be equivalent to using the 'required' mode).
+This mode should be used for pages that have a private component, but that 
+should also be publicly accessible. Example: a public web page with a 'hello john' message in the top-right corner.
+
