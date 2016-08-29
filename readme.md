@@ -111,10 +111,10 @@ In the route handler we can use `request.auth.strategy` to check which strategy 
 
 ## 'required' mode vs 'try' mode 
 
-With 'required' mode, we *only* reach the route handler if the request is authenticated (that is, if we call `reply.continue` in the `authenticate` function). 
-This mode should be used for API endpoints with private data, for instance.
+With 'required' mode, we *only* reach the route handler if the request is authenticated (that is, if we call `reply.continue` in `authenticate`). 
+This mode should be used for API endpoints with private data, for instance, as it doesn't make sense to send a 200 response otherwise.
 
-With 'try' mode we *always* reach the handler, even if the authentication failed. In the handler we can always verify if the request was authenticated using `request.auth.isAuthenticated` (we can always call `reply(boomErr)` from the handler, which would then be equivalent to using the 'required' mode).
+With 'try' mode we *always* reach the handler, even if the authentication failed. In the handler we can always verify if the request was authenticated using `request.auth.isAuthenticated` (and we can always call `reply(boomErr)` from the handler, which would then be equivalent to using the 'required' mode).
 This mode should be used for pages that have a private component, but that 
-should also be publicly accessible. Example: a public web page with a 'hello john' message in the top-right corner.
+should also be publicly accessible. Example: a public web page with a 'hello john' message in the top-right corner (if the user is authenticated), or with 'please login' (if the user is not authenticated).
 
